@@ -1,73 +1,101 @@
-# React + TypeScript + Vite
+# Doctor
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A React + TypeScript + Vite single-page app with token-based authentication
+(register, login, and protected routes). It talks to a backend REST API for
+auth and stores the auth token on the client.
 
-Currently, two official plugins are available:
+## Tech stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- [React 19](https://react.dev/)
+- [TypeScript](https://www.typescriptlang.org/)
+- [Vite](https://vite.dev/) (dev server + build)
+- [React Router](https://reactrouter.com/) for routing
+- [ESLint](https://eslint.org/) for linting
 
-## React Compiler
+## Prerequisites
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- [Node.js](https://nodejs.org/) 18+ (Node 20+ recommended)
+- npm (ships with Node)
 
-## Expanding the ESLint configuration
+## Getting started
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+1. Install dependencies:
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+2. Configure environment variables. Copy the example file and adjust the API URL:
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+cp .env.example .env
 ```
+
+`.env`:
+
+```bash
+# Base URL for the backend API. Defaults to "/api" when unset.
+VITE_API_BASE_URL=http://localhost:8000/api
+```
+
+3. Start the dev server:
+
+```bash
+npm run dev
+```
+
+Vite prints a local URL (default <http://localhost:5173>). Open it in your browser.
+
+## Available scripts
+
+| Command           | Description                                          |
+| ----------------- | ---------------------------------------------------- |
+| `npm run dev`     | Start the Vite dev server with hot module reloading. |
+| `npm run build`   | Type-check (`tsc -b`) and build for production.      |
+| `npm run preview` | Preview the production build locally.                |
+| `npm run lint`    | Run ESLint over the project.                         |
+
+## Building for production
+
+```bash
+npm run build
+```
+
+The optimized output is written to `dist/`. To preview the build locally:
+
+```bash
+npm run preview
+```
+
+## Configuration
+
+| Variable            | Default | Description                                                                 |
+| ------------------- | ------- | --------------------------------------------------------------------------- |
+| `VITE_API_BASE_URL` | `/api`  | Base URL of the backend REST API the app calls for auth and other requests. |
+
+The app expects the backend to expose these auth endpoints relative to
+`VITE_API_BASE_URL`:
+
+- `POST /auth/register` — create an account; returns `{ token, user }`
+- `POST /auth/login` — sign in; returns `{ token, user }`
+- `GET /auth/me` — fetch the current user (requires `Authorization: Bearer <token>`)
+
+> **Note:** A running backend is required for authentication to work. Without it,
+> register/login requests will fail.
+
+## Project structure
+
+```
+src/
+├── api/          # API client + typed endpoint helpers (auth, etc.)
+├── components/   # Reusable components (e.g. ProtectedRoute)
+├── context/      # React context providers (AuthContext)
+├── lib/          # Low-level helpers (token storage)
+├── pages/        # Route pages (Login, Register, Home)
+├── types/        # Shared TypeScript types
+├── App.tsx       # Route definitions
+└── main.tsx      # App entry point
+```
+
+The `@` alias maps to `src/` (configured in `vite.config.ts` and `tsconfig.app.json`),
+so imports can be written as `@/api/client`, `@/pages/LoginPage`, etc.
